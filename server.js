@@ -17,11 +17,11 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
     console.log(socket.id);
-    clientList.socketId = "";
+    clientList[socket.id] = "";
     socket.on('get_socket_id', function(data){
         console.log(data);
         // send private message
-        io.to(socket.id).emit("message", "secret message for you");
+        io.to(socket.id).emit("message", socket.id);
     });
     socket.on('disconnect', function(){
         console.log("socket: "+socket.id+" disconnected");
