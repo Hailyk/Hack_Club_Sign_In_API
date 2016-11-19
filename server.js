@@ -1,9 +1,9 @@
 'use strict';
 
 // temp vars, testing and development only
-var mongoUrl = 'mongodb://localhost:27017';
-var restPort = 3000;
-var socketPort = 80;
+const mongoUrl = 'mongodb://localhost:27017';
+const restPort = 3000;
+const socketPort = 80;
 
 // dependencies
 var path = require('path');
@@ -116,11 +116,43 @@ io.on('connection', function (socket) {
     // add socket id to client list
     clientList[socket.id] = "";
     // when get_socket_id event is received do ...
-    socket.on('get_socket_id', function(data){
+    // this event is for development only
+    socket.on('get_socket_id', (data)=>{
         // log the data received
         console.log(data);
         // send private message
         io.to(socket.id).emit("message", socket.id);
+    });
+    
+    // everything to do with member event
+    socket.on('member', (data)=>{
+        // action type is determined by mode in data object
+        var actionType = data.mode;
+        
+        // determine the action type
+        if(actionType == "read"){
+            db.read("member", {}, function(result){
+                io.to(socket.id).emit("member", result);
+            });
+        }
+        else if(actionType == "create"){
+            db.create("member", data.where, function(result){
+
+            });
+        }
+        else if(actionType == "update"){
+            db.updateMany("member", data.where, req.body.replace, function(result){
+
+            });
+        }
+        else if(actionType == "delete"){
+            db.removeMany("member", data.where, function(result){
+
+            });
+        }
+        else{
+            io.to(socket.id).emit("member", {error:true,message:"action not defined"});
+        }
     });
     
     // do ... when client disconnect
